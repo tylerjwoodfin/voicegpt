@@ -1,4 +1,5 @@
 gtts
+pyaudio
 pygame
 pydub
 SpeechRecognition

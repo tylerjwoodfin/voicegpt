@@ -1,5 +1,5 @@
 # VoiceGPT
-This is a simple Python voice assistant powered by ChatGPT.
+This is a simple Python voice assistant powered by ChatGPT, designed for Debian-based Linux (e.g. Ubuntu).
 
 ## dependencies
 
@@ -10,7 +10,13 @@ This is a simple Python voice assistant powered by ChatGPT.
 
 - clone this repo
 
-- `pip install -r https://github.com/tylerjwoodfin/voicegpt/blob/main/requirements.md`
+- run:
+"""
+sudo apt-get install sox libsox-fmt-all
+sudo apt-get install espeak libespeak1 libespeak-dev
+sudo apt-get install portaudio19-dev
+pip install -r https://github.com/tylerjwoodfin/voicegpt/blob/main/requirements.md
+"""
 
 - if using `cabinet`, store the API key you generated from https://platform.openai.com/account/api-keys
   in `keys -> openai`:
