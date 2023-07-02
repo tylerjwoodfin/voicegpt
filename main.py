@@ -123,7 +123,7 @@ while True:
         print("User:", user_input)
         output = query_gpt(user_input, conversation)
         if output:
-            print("Assistant:", output)
+            print(f"Assistant: {output}\n")
             speak(output)
             conversation.append({"role": "user", "content": user_input})
             conversation.append({"role": "assistant", "content": output})
