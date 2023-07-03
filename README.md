@@ -26,6 +26,16 @@ pip install -r https://raw.githubusercontent.com/tylerjwoodfin/voicegpt/main/req
 ### pre-launch personality configuration
 - Modify `PERSONALITY.md`. Each statement should be kept on one line.
 
+## adding custom commands
+- by default, VoiceGPT will send all user input to ChatGPT. However, the `parse()` function can
+  run any other code as needed based on user input.
+
+- To avoid incompatibilities and runtime errors, `parse()` will not run unless 
+  `voicegpt` -> `parse_enabled` is set to True in Cabinet...
+  or simply remove this check; you're editing the code as it is, anyway.
+- `cabinet -p voicegpt parse_enabled true`
+- modify `parse()` as needed
+
 ## warnings
 - `gtts` is used, which interfaces with Google to convert speech to text.
 

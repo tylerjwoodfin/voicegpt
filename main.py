@@ -1,21 +1,25 @@
 """
-Python voice assistant experiment
+Python voice assistant experiment using ChatGPT API
 """
 import os
 import sys
-import subprocess
+import shlex
 import requests
+import subprocess
 from gtts import gTTS
 import speech_recognition as sr
 
 API_ENDPOINT = "https://api.openai.com/v1/chat/completions"
 API_KEY = None
+HAS_CABINET = True
 
 try:
     from cabinet import Cabinet
     cab = Cabinet()
     API_KEY = cab.get("keys", "openai")
+    PARSE_ENABLED = cab.get("voicegpt", "parse_enabled")
 except ImportError:
+    HAS_CABINET = False
     key_file_path = os.path.join(os.path.dirname(
         os.path.abspath(__file__)), "OPENAI_KEY.md")
     if os.path.isfile(key_file_path):
@@ -104,23 +108,58 @@ def query_gpt(query, gpt_conversation=None):
         "messages": messages,
     }
 
-    response = requests.post(
-        API_ENDPOINT, headers=headers, json=data, timeout=30)
-    if response.status_code == 200:
-        messages = response.json()["choices"][0]["message"]["content"]
-        return messages
-    else:
-        print("Sorry, there was an error with the API request.")
-        print(response.json())
-        return None
+    try:
+        response = requests.post(
+            API_ENDPOINT, headers=headers, json=data, timeout=10)
+        if response.status_code == 200:
+            messages = response.json()["choices"][0]["message"]["content"]
+            return messages
+        else:
+            print("Sorry, there was an error with the API request.")
+            print(response.json())
+            speak("Hey, I ran into an error.")
+            if HAS_CABINET:
+                cab.log("VoiceGPT:", response.json(), level="error")
+            return None
+    except TimeoutError as error:
+        speak("Hey, I'm not online. Let's talk later.")
+        print(error)
 
 
 conversation = []
+
+def parse(input_string: str):
+    """
+    Parse the user input and perform specific actions if certain conditions are met.
+
+    MODIFY THIS TO MATCH YOUR OWN NEEDS.
+    
+    Args:
+        input_string (str): The user input to parse.
+
+    Returns:
+        bool: True if the conditions are met, False otherwise.
+    """
+
+    query = input_string.lower()
+    if query in ['cancel', 'thank you']:
+        sys.exit(0)
+
+    if query.startswith("remind"):
+        command = shlex.split(f"{query} --noconfirm")
+        command_output = subprocess.run(command, capture_output=True, text=True, check=False)
+        speak(command_output.stdout)
+        return True
+
+    return False
+
 
 while True:
     user_input = listen()
     if user_input:
         print("User:", user_input)
+        if PARSE_ENABLED and parse(user_input):
+            continue
         output = query_gpt(user_input, conversation)
         if output:
             print(f"Assistant: {output}\n")
